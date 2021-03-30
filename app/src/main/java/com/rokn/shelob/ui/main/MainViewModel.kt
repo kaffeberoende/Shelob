@@ -4,32 +4,26 @@ import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.core.content.edit
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.google.gson.Gson
 import com.rokn.shelob.R
 import com.rokn.shelob.ui.main.data.TokenResponse
-import com.rokn.shelob.ui.main.data.Value
 import com.rokn.shelob.ui.main.data.ValuesCollection
-import com.rokn.shelob.ui.main.data.ValuesResponse
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request.Builder
 import okhttp3.RequestBody.Companion.toRequestBody
 
-
 class MainViewModel : ViewModel() {
+    private val _data = MutableLiveData<ValuesCollection>()
+    val data: LiveData<ValuesCollection> get() = _data
 
-    val data = MutableLiveData<ValuesCollection>()
-
-    init {
-        data.value = ValuesCollection()
-    }
-
-    val isLoggedIn = MutableLiveData<Boolean>(true)
+    val isLoggedIn = MutableLiveData(true)
 
     private var token: String? = null
 
@@ -75,80 +69,27 @@ class MainViewModel : ViewModel() {
 
     fun fetchData(context: Context) {
         if (token == null) {
-            Log.d(TAG, "fetchData: fetching stored token")
-            token = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE)
-                .getString(TOKEN, null)
+            Log.d(MainViewModel.TAG, "fetchData: fetching stored token")
+            token = context.getSharedPreferences(MainViewModel.SHARED_PREFS, Context.MODE_PRIVATE)
+                .getString(MainViewModel.TOKEN, null)
         }
+
         if (token == null) {
-            Log.d(TAG, "fetchData: no stored token, returning")
+            Log.d(MainViewModel.TAG, "fetchData: no stored token, returning")
             isLoggedIn.value = false
             return
         }
 
-        viewModelScope.launch(Dispatchers.IO) {
-            val tiltValues = fetchPages(TILT_URL, MAX_PAGES)
-            val temperatureValues = fetchPages(TEMPERATURE_URL, MAX_PAGES)
-            val batteryValues = fetchPages(BATTERY_URL, MAX_PAGES)
-            val gravityValues = fetchPages(GRAVITY_URL, MAX_PAGES)
-            val rssiValues = fetchPages(RSSI_URL, 1)
-            val intervalValues = fetchPages(INTERVAL_URL, 1)
-
-            viewModelScope.launch(Dispatchers.Main) {
-                data.value?.tiltValues = tiltValues
-                data.value?.temperatureValues = temperatureValues
-                data.value?.batteryValues = batteryValues
-                data.value?.gravityValues = gravityValues
-                data.value?.rssiValues = rssiValues
-                data.value?.intervalValues = intervalValues
-                data.value = data.value
-            }
-        }
-    }
-
-    private fun fetchPages(url: String, maxPages: Int): List<Value> {
-        val values = mutableListOf<Value>()
-        var internalUrl: String? = url
-        var pages = 0
-        while (internalUrl != null && pages++ <= maxPages) {
-            val onePage = fetchOnePageOfValues(internalUrl)
-            values.addAll(onePage.first as? List<Value> ?: emptyList())
-            internalUrl = onePage.second
-        }
-        return values
-    }
-
-    private fun fetchOnePageOfValues(url: String): Pair<List<Value>, String?> {
-        if (token != null) {
-            Log.d(TAG, "fetchOnePageOfValues: $url")
-            val client: OkHttpClient = OkHttpClient().newBuilder()
-                .build()
-            val request: Request = Builder()
-                .url(url)
-                .method("GET", null)
-                .addHeader(
-                    TOKEN_HEADER,
-                    token.orEmpty()
-                )
-                .build()
-            val response: Response = client.newCall(request).execute()
-            if (response.isSuccessful) {
-                Log.d(TAG, "fetchOnePageOfValues: success")
-                response.body?.string()?.let {
-                    val gson = Gson()
-                    val resp = gson.fromJson<ValuesResponse>(it, ValuesResponse::class.java)
-                    return Pair(resp.results.orEmpty(), resp.next)
+        viewModelScope.launch {
+            Repository.getData(token = token, currentTime = System.currentTimeMillis())
+                .onStart { /* _foo.value = loading state */ }
+                .catch { exception -> /* _foo.value = error state */ }
+                .collect { values ->
+                    _data.value = values
                 }
-            } else {
-                Log.d(TAG, "fetchOnePageOfValues: ${response.code}")
-                viewModelScope.launch(Dispatchers.Main) {
-                    isLoggedIn.value = false
-                }
-            }
-        } else {
-            Log.d(TAG, "fetchOnePageOfValues: no token")
         }
-        return Pair(emptyList(), null)
     }
+
 
     companion object {
         const val TAG = "SPINDEL MODEL"
