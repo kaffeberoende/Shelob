@@ -1,5 +1,7 @@
 package com.rokn.shelob.ui.main.data
 
+import com.rokn.shelob.ui.main.database.Value
+
 class ValuesCollection() {
     var tiltValues: List<Value>? = null
     var temperatureValues: List<Value>? = null

@@ -1,100 +1,102 @@
 package com.rokn.shelob.ui.main
 
+import android.content.Context
 import android.util.Log
-import com.google.gson.Gson
-import com.rokn.shelob.ui.main.data.Value
+import androidx.room.Room
+import com.rokn.shelob.ui.main.Network.BATTERY_URL
+import com.rokn.shelob.ui.main.Network.GRAVITY_URL
+import com.rokn.shelob.ui.main.Network.INTERVAL_URL
+import com.rokn.shelob.ui.main.Network.RSSI_URL
+import com.rokn.shelob.ui.main.Network.TEMPERATURE_URL
+import com.rokn.shelob.ui.main.Network.TILT_URL
 import com.rokn.shelob.ui.main.data.ValuesCollection
-import com.rokn.shelob.ui.main.data.ValuesResponse
+import com.rokn.shelob.ui.main.database.Database
+import com.rokn.shelob.ui.main.database.Value
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-import java.util.concurrent.TimeUnit
 
 object Repository {
 
-    fun getData(token: String?, currentTime: Long): Flow<ValuesCollection> {
+
+    fun getData(context: Context, token: String?, currentTime: Long): Flow<ValuesCollection> {
+
+        val database = Room.databaseBuilder(context, Database::class.java, DATABASE_NAME).build()
+        val valuesDao = database.valueDao()
+
         return flow {
-            val values = ValuesCollection()
-            //First get local data and emit it
-            //TODO Local data
-            emit(values)
+            val storedValues = ValuesCollection()
 
-            //Now get data for a few hours and emit it (använd tiden från den senaste lokala datan här sen)
-            val time = currentTime - TimeUnit.HOURS.toMillis(2)
-            values.tiltValues = fetchOnePageOfValues(MainViewModel.TILT_URL, time, token).first
-            emit(values)
-            values.temperatureValues = fetchOnePageOfValues(MainViewModel.TEMPERATURE_URL, time, token).first
-            emit(values)
-            values.batteryValues = fetchOnePageOfValues(MainViewModel.BATTERY_URL, time, token).first
-            emit(values)
-            values.gravityValues = fetchOnePageOfValues(MainViewModel.GRAVITY_URL, time, token).first
-            emit(values)
-            values.rssiValues = fetchOnePageOfValues(MainViewModel.RSSI_URL, time, token).first
-            emit(values)
-            values.intervalValues = fetchOnePageOfValues(MainViewModel.INTERVAL_URL, time, token).first
-            emit(values)
+            //First get local data and emit it, should be fast
+            storedValues.tiltValues = valuesDao.getAll(type = ValueType.TILT)
+            Log.d(TAG, "getData: gotten ${storedValues.tiltValues?.size} tiltvalues from database")
+            storedValues.temperatureValues = valuesDao.getAll(type = ValueType.TEMPERATURE)
+            storedValues.batteryValues = valuesDao.getAll(type = ValueType.BATTERY)
+            storedValues.gravityValues = valuesDao.getAll(type = ValueType.GRAVITY)
+            storedValues.rssiValues = valuesDao.getAll(type = ValueType.RSSI)
+            storedValues.intervalValues = valuesDao.getAll(type = ValueType.INTERVAL)
+            emit(storedValues)
 
-            //Now get the rest of the data and emit it (page by page?)
-            emit(fetchData(token))
+            //Now get any data that is newer than the stored data
+            val time = storedValues.tiltValues?.firstOrNull()?.timestamp ?: 0L
+            Log.d(TAG, "getData: getting from after $time")
+            val latestValues = ValuesCollection()
+            latestValues.tiltValues = Network.fetchOnePageOfValues(TILT_URL, time, token).first
+            storedValues.tiltValues = (latestValues.tiltValues ?: emptyList()) + (storedValues.tiltValues ?: emptyList())
+            emit(storedValues)
+
+            latestValues.temperatureValues = Network.fetchOnePageOfValues(TEMPERATURE_URL, time, token).first
+            storedValues.temperatureValues = (latestValues.temperatureValues ?: emptyList()) + (storedValues.temperatureValues ?: emptyList())
+            emit(storedValues)
+
+            latestValues.batteryValues = Network.fetchOnePageOfValues(BATTERY_URL, time, token).first
+            storedValues.batteryValues = (latestValues.batteryValues ?: emptyList()) + (storedValues.batteryValues ?: emptyList())
+            emit(storedValues)
+
+            latestValues.gravityValues = Network.fetchOnePageOfValues(GRAVITY_URL, time, token).first
+            storedValues.gravityValues = (latestValues.gravityValues ?: emptyList()) + (storedValues.gravityValues ?: emptyList())
+            emit(storedValues)
+
+            latestValues.rssiValues = Network.fetchOnePageOfValues(RSSI_URL, time, token).first
+            storedValues.rssiValues = (latestValues.rssiValues ?: emptyList()) + (storedValues.rssiValues ?: emptyList())
+            emit(storedValues)
+
+            latestValues.intervalValues = Network.fetchOnePageOfValues(INTERVAL_URL, time, token).first
+            storedValues.intervalValues = (latestValues.intervalValues ?: emptyList()) + (storedValues.intervalValues ?: emptyList())
+            emit(storedValues)
+
+            //Now get the rest of the data and emit it (page by page?) Använd tiden från den senaste datan här sen?
+         /*   val olderValues = Network.fetchData(token = token, start = , end = )
+            Log.d(TAG, "getData: olderDataSize")
+            emit(newerValues)
+*/
+            //Store all the new data in room
+            val listToStore = mutableListOf<Value>()
+            Log.d(TAG, "getData: ${latestValues.tiltValues?.size} values to store")
+            latestValues.tiltValues?.forEach {
+                listToStore.add(Value(type = ValueType.TILT, timestamp = it.timestamp, value = it.value, created_at = it.created_at))
+            }
+            latestValues.batteryValues?.forEach {
+                listToStore.add(Value(type = ValueType.BATTERY, timestamp = it.timestamp, value = it.value, created_at = it.created_at))
+            }
+            latestValues.gravityValues?.forEach {
+                listToStore.add(Value(type = ValueType.GRAVITY, timestamp = it.timestamp, value = it.value, created_at = it.created_at))
+            }
+            latestValues.temperatureValues?.forEach {
+                listToStore.add(Value(type = ValueType.TEMPERATURE, timestamp = it.timestamp, value = it.value, created_at = it.created_at))
+            }
+            latestValues.rssiValues?.forEach {
+                listToStore.add(Value(type = ValueType.RSSI, timestamp = it.timestamp, value = it.value, created_at = it.created_at))
+            }
+            latestValues.intervalValues?.forEach {
+                listToStore.add(Value(type = ValueType.INTERVAL, timestamp = it.timestamp, value = it.value, created_at = it.created_at))
+            }
+            database.valueDao().insert(listToStore)
+
         }.flowOn(Dispatchers.IO)
     }
 
-    private fun fetchData(token: String?): ValuesCollection {
-            val values = ValuesCollection()
-            values.tiltValues = fetchPages(MainViewModel.TILT_URL, MainViewModel.MAX_PAGES, token)
-            values.temperatureValues = fetchPages(MainViewModel.TEMPERATURE_URL, MainViewModel.MAX_PAGES, token)
-            values.batteryValues = fetchPages(MainViewModel.BATTERY_URL, MainViewModel.MAX_PAGES, token)
-            values.gravityValues = fetchPages(MainViewModel.GRAVITY_URL, MainViewModel.MAX_PAGES, token)
-            values.rssiValues = fetchPages(MainViewModel.RSSI_URL, 1, token)
-            values.intervalValues = fetchPages(MainViewModel.INTERVAL_URL, 1, token)
-            return values
-    }
-
-
-    private fun fetchPages(url: String, maxPages: Int, token: String?): List<Value> {
-        val values = mutableListOf<Value>()
-        var internalUrl: String? = url
-        var pages = 0
-        while (internalUrl != null && pages++ <= maxPages) {
-            val onePage = fetchOnePageOfValues(internalUrl, null, token)
-            values.addAll(onePage.first as? List<Value> ?: emptyList())
-            internalUrl = onePage.second
-        }
-        return values
-    }
-
-    private fun fetchOnePageOfValues(url: String, startTime: Long?, token: String?): Pair<List<Value>, String?> {
-        var localUrl = url
-        startTime?.let {
-            localUrl += "?start=$startTime"
-        }
-        Log.d(MainViewModel.TAG, "fetchOnePageOfValues: $localUrl")
-        val client: OkHttpClient = OkHttpClient().newBuilder()
-            .build()
-        val request: Request = Request.Builder()
-            .url(localUrl)
-            .method("GET", null)
-            .addHeader(
-                MainViewModel.TOKEN_HEADER,
-                token.orEmpty()
-            )
-            .build()
-        val response: Response = client.newCall(request).execute()
-        if (response.isSuccessful) {
-            Log.d(MainViewModel.TAG, "fetchOnePageOfValues: success")
-            response.body?.string()?.let {
-                val gson = Gson()
-                val resp = gson.fromJson<ValuesResponse>(it, ValuesResponse::class.java)
-                return Pair(resp.results.orEmpty(), resp.next)
-            }
-        } else {
-            Log.d(MainViewModel.TAG, "fetchOnePageOfValues: ${response.code}")
-        }
-
-        return Pair(emptyList(), null)
-    }
+    const val DATABASE_NAME = "database-name"
+    private const val TAG = "SPIN_REPOSITORY"
 }

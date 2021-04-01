@@ -60,7 +60,11 @@ class MainViewModel : ViewModel() {
                         }
                     }
 
+                } else {
+                    Log.d(TAG, "login: failed to login")
+                    isLoggedIn.value = false
                 }
+
             }
         } else {
             Toast.makeText(context, R.string.no_api_key_set, Toast.LENGTH_SHORT).show()
@@ -69,21 +73,24 @@ class MainViewModel : ViewModel() {
 
     fun fetchData(context: Context) {
         if (token == null) {
-            Log.d(MainViewModel.TAG, "fetchData: fetching stored token")
-            token = context.getSharedPreferences(MainViewModel.SHARED_PREFS, Context.MODE_PRIVATE)
-                .getString(MainViewModel.TOKEN, null)
+            Log.d(TAG, "fetchData: fetching stored token")
+            token = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE)
+                .getString(TOKEN, null)
         }
 
         if (token == null) {
-            Log.d(MainViewModel.TAG, "fetchData: no stored token, returning")
+            Log.d(TAG, "fetchData: no stored token, returning")
             isLoggedIn.value = false
             return
         }
 
         viewModelScope.launch {
-            Repository.getData(token = token, currentTime = System.currentTimeMillis())
+            Repository.getData(context = context, token = token, currentTime = System.currentTimeMillis())
                 .onStart { /* _foo.value = loading state */ }
-                .catch { exception -> /* _foo.value = error state */ }
+                .catch { exception ->
+                    Log.d(TAG, "fetchData: exception: $exception")
+                    isLoggedIn.value = false
+                }
                 .collect { values ->
                     _data.value = values
                 }
@@ -95,19 +102,11 @@ class MainViewModel : ViewModel() {
         const val TAG = "SPINDEL MODEL"
         const val SHARED_PREFS = "prefs"
         const val TOKEN = "token"
-        private const val BASE_URL = "https://industrial.api.ubidots.com/api/v1.6/"
+        const val BASE_URL = "https://industrial.api.ubidots.com/api/v1.6/"
         const val TOKEN_URL = "${BASE_URL}auth/token/"
         const val API_KEY_HEADER = "x-ubidots-apikey"
         const val API_KEY = "api_key"
         const val DEVICE_NAME = "device_name"
-        private const val VALUES_BASE_URL = "${BASE_URL}devices/ispindel000/"
-        const val TILT_URL = "${VALUES_BASE_URL}tilt/values/"
-        const val TEMPERATURE_URL = "${VALUES_BASE_URL}temperature/values/"
-        const val BATTERY_URL = "${VALUES_BASE_URL}battery/values/"
-        const val GRAVITY_URL = "${VALUES_BASE_URL}gravity/values/"
-        const val RSSI_URL = "${VALUES_BASE_URL}rssi/values/"
-        const val INTERVAL_URL = "${VALUES_BASE_URL}interval/values/"
         const val TOKEN_HEADER = "X-Auth-Token"
-        const val MAX_PAGES = 10
     }
 }

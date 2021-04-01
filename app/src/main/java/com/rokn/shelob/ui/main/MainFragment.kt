@@ -47,7 +47,6 @@ class MainFragment : Fragment() {
             Log.d(TAG, "observed login: $it")
             if (it) {
                 loginButton.visibility = View.GONE
-                Log.d(TAG, "onViewCreated: settng to true111")
                 showProgressBar(true)
                 model.fetchData(requireContext())
                 recyclerView.visibility = View.VISIBLE
@@ -62,13 +61,11 @@ class MainFragment : Fragment() {
                 return@observe
             adapter.values = values
             adapter.notifyDataSetChanged()
-            Log.d(TAG, "onViewCreated: setting to false!!!!")
             showProgressBar(false)
         })
 
         if (model.isLoggedIn.value == true) {
             loginButton.visibility = View.GONE
-            Log.d(TAG, "onViewCreated: setting to true!!!")
             showProgressBar(true)
             model.fetchData(requireContext())
 
