@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">iSpindel data viewer</string>
+    <string name="graph_tab_name">Graph</string>
+    <string name="raw_data_tab_name">Raw data</string>
+    <string name="settings_tab_name">Settings</string>
+
     <string name="login_ubidots">Login to Ubidots</string>
     <string name="api_key">Enter your api key from Ubidots</string>
     <string name="device_name">Enter device name</string>
@@ -9,4 +13,5 @@
     <string name="clear_data">Clear data</string>
 
     <string name="no_api_key_set">No api key set! \nGo to settings and add your api key from Ubidots.</string>
+
 </resources>
