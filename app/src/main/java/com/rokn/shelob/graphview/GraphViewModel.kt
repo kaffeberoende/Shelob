@@ -6,11 +6,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rokn.shelob.data.LoginHelper
+import com.rokn.shelob.data.*
 import com.rokn.shelob.rawview.RawDataViewModel
-import com.rokn.shelob.data.Repository
-import com.rokn.shelob.data.ValueType
-import com.rokn.shelob.data.Value
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onStart
@@ -18,8 +15,8 @@ import kotlinx.coroutines.launch
 
 class GraphViewModel: ViewModel() {
 
-    private val _data = MutableLiveData<List<Value>>()
-    val data: LiveData<List<Value>> get() = _data
+    private val _data = MutableLiveData<ValuesCollection>()
+    val data: LiveData<ValuesCollection> get() = _data
 
     val isLoggedIn = MutableLiveData(true)
 
@@ -42,7 +39,7 @@ class GraphViewModel: ViewModel() {
         }
 
         viewModelScope.launch {
-            Repository.getDataOfOneType(context = context, token = token, type = ValueType.GRAVITY)
+            Repository.getDataOfOneType(context = context, token = token, ValueType.GRAVITY, ValueType.TEMPERATURE)
                 .onStart { /* _foo.value = loading state */ }
                 .catch { exception ->
                     Log.d(RawDataViewModel.TAG, "fetchData: exception: $exception")

@@ -1,5 +1,6 @@
 package com.rokn.shelob.graphview
 
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -16,7 +17,6 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.rokn.shelob.rawview.RawDataFragment
 import com.rokn.shelob.R
 import com.rokn.shelob.data.Repository
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 class GraphFragment: Fragment() {
@@ -48,26 +48,40 @@ class GraphFragment: Fragment() {
 
         val refreshButton = view.findViewById<Button>(R.id.refresh_button)
         refreshButton.setOnClickListener {
-            model.fetchData(requireContext())
+            model.fetchData(requireContext())//TODO change to pull to refresh
         }
 
         model.data.observe(viewLifecycleOwner, { values ->
-            if (values.isNullOrEmpty())
-                return@observe
 
+            val gravityGraph = view.findViewById<LineChart>(R.id.gravity_chart)
 
-            //TODO move to viewmodel and observe a list of Entrys
-            val data = values.map { value ->
+            //TODO move to viewmodel and observe a list of Entrys?
+            val gravityData = values.gravityValues.map { value ->
                 Log.d(TAG, "adding Entry(${formatTime(value.timestamp)}, ${value.value?.toFloat() ?: 0F}")
                 Entry(formatTime(value.timestamp), value.value?.toFloat() ?: 0F)
             }
 
-            val graph = view.findViewById<LineChart>(R.id.line_chart)
-            val dataset = LineDataSet(data, "Specific Gravity")
-            dataset.setDrawValues(true)
-            graph.data = LineData(dataset)
-            graph.notifyDataSetChanged()
-            graph.invalidate()
+            val gravityDataset = LineDataSet(gravityData, "Specific Gravity")
+            gravityDataset.setCircleColor(Color.BLUE)
+            gravityDataset.setDrawValues(true)
+            gravityGraph.data = LineData(gravityDataset)
+            gravityGraph.notifyDataSetChanged()
+            gravityGraph.invalidate()
+
+            val temperatureData = values.temperatureValues.map { value ->
+                Log.d(TAG, "adding Entry(${formatTime(value.timestamp)}, ${value.value?.toFloat() ?: 0F}")
+                Entry(formatTime(value.timestamp), value.value?.toFloat() ?: 0F)
+            }
+
+            val temperatureGraph = view.findViewById<LineChart>(R.id.temperature_chart)
+            val temperatureDataset = LineDataSet(temperatureData, "Temperature")
+            temperatureDataset.setCircleColor(Color.RED)
+            temperatureDataset.setDrawValues(true)
+
+
+            temperatureGraph.data = LineData(temperatureDataset)
+            temperatureGraph.notifyDataSetChanged()
+            temperatureGraph.invalidate()
             showProgressBar(false)
         })
     }

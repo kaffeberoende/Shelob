@@ -19,9 +19,7 @@ class RawDataViewModel : ViewModel() {
     val isLoggedIn = MutableLiveData(true)
 
     fun login(context: Context) {
-        viewModelScope.launch {
-            isLoggedIn.value = LoginHelper.login(context)
-        }
+        isLoggedIn.value = LoginHelper.login(context)
     }
 
     fun fetchData(context: Context) {

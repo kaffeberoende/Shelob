@@ -9,33 +9,6 @@ import okhttp3.Response
 
 object Network {
 
-    fun fetchData(token: String?, start: Long, end: Long): ValuesCollection {
-        val values = ValuesCollection()
-        values.tiltValues = fetchPages(TILT_URL, start, token)
-        values.temperatureValues = fetchPages(TEMPERATURE_URL, start, token)
-        values.batteryValues = fetchPages(BATTERY_URL, start, token)
-        values.gravityValues = fetchPages(GRAVITY_URL, start, token)
-        values.rssiValues = fetchPages(RSSI_URL, start, token)
-        values.intervalValues = fetchPages(INTERVAL_URL, start, token)
-        return values
-    }
-
-    private fun fetchPages(url: String, startTime: Long?, token: String?): List<Value> {
-        var localUrl = url
-        startTime?.let {
-            localUrl += "?start=${startTime + 1}"
-        }
-        var internalUrl: String? = localUrl
-        var pages = 0
-        val values = mutableListOf<Value>()
-        while (internalUrl != null && pages++ <= MAX_PAGES) {
-            val onePage = fetchOnePageOfValues(internalUrl, null, token)
-            values.addAll(onePage.first as? List<Value> ?: emptyList())
-            internalUrl = onePage.second
-        }
-        return values
-    }
-
     fun fetchPagesOfType(startTime: Long?, token: String?, type: ValueType): List<Value> {
         return fetchPages(url = getUrlForType(type), startTime = startTime, token = token)
     }
@@ -61,7 +34,7 @@ object Network {
             Log.d(RawDataViewModel.TAG, "fetchOnePageOfValues: success")
             response.body?.string()?.let {
                 val gson = Gson()
-                val resp = gson.fromJson<ValuesResponse>(it, ValuesResponse::class.java)
+                val resp = gson.fromJson(it, ValuesResponse::class.java)
                 return Pair(resp.results.orEmpty(), resp.next)
             }
         } else {
@@ -71,7 +44,24 @@ object Network {
         return Pair(emptyList(), null)
     }
 
-    private fun getUrlForType(type: ValueType): String {
+    private fun fetchPages(url: String, startTime: Long?, token: String?): List<Value> {
+        var localUrl = url
+        startTime?.let {
+            localUrl += "?start=${startTime + 1}"
+        }
+        var internalUrl: String? = localUrl
+        var pages = 0
+        val values = mutableListOf<Value>()
+        while (internalUrl != null && pages++ <= MAX_PAGES) {
+            val onePage = fetchOnePageOfValues(internalUrl, null, token)
+            values.addAll(onePage.first as? List<Value> ?: emptyList())
+            internalUrl = onePage.second
+        }
+        return values
+    }
+
+    //TODO move to ValueType class?
+    fun getUrlForType(type: ValueType): String {
         return when(type) {
             ValueType.TILT -> TILT_URL
             ValueType.TEMPERATURE -> TEMPERATURE_URL
@@ -83,11 +73,11 @@ object Network {
     }
 
     private const val VALUES_BASE_URL = "${RawDataViewModel.BASE_URL}devices/ispindel000/"
-    const val TILT_URL = "${VALUES_BASE_URL}tilt/values/"
-    const val TEMPERATURE_URL = "${VALUES_BASE_URL}temperature/values/"
-    const val BATTERY_URL = "${VALUES_BASE_URL}battery/values/"
-    const val GRAVITY_URL = "${VALUES_BASE_URL}gravity/values/"
-    const val RSSI_URL = "${VALUES_BASE_URL}rssi/values/"
-    const val INTERVAL_URL = "${VALUES_BASE_URL}interval/values/"
+    private const val TILT_URL = "${VALUES_BASE_URL}tilt/values/"
+    private const val TEMPERATURE_URL = "${VALUES_BASE_URL}temperature/values/"
+    private const val BATTERY_URL = "${VALUES_BASE_URL}battery/values/"
+    private const val GRAVITY_URL = "${VALUES_BASE_URL}gravity/values/"
+    private const val RSSI_URL = "${VALUES_BASE_URL}rssi/values/"
+    private const val INTERVAL_URL = "${VALUES_BASE_URL}interval/values/"
     private const val MAX_PAGES = 2
 }
