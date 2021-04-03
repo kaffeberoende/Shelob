@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.flowOn
 object Repository {
 
 
-    fun getData(context: Context, token: String?, currentTime: Long): Flow<ValuesCollection> {
+    fun getData(context: Context, token: String?): Flow<ValuesCollection> {
 
         val database = Room.databaseBuilder(context, Database::class.java, DATABASE_NAME).build()
         val valuesDao = database.valueDao()
@@ -28,7 +28,7 @@ object Repository {
         return flow {
             val storedValues = ValuesCollection()
 
-            //First get local data and emit it, should be fast
+            //Local data
             storedValues.tiltValues = valuesDao.getAll(type = ValueType.TILT)
             Log.d(TAG, "getData: gotten ${storedValues.tiltValues?.size} tiltvalues from database")
             storedValues.temperatureValues = valuesDao.getAll(type = ValueType.TEMPERATURE)
@@ -38,8 +38,8 @@ object Repository {
             storedValues.intervalValues = valuesDao.getAll(type = ValueType.INTERVAL)
             emit(storedValues)
 
-            //Now get any data that is newer than the stored data
-            val time = storedValues.tiltValues?.firstOrNull()?.timestamp ?: 0L
+            //Data from network
+            val time = storedValues.tiltValues?.firstOrNull()?.timestamp ?: getStartTime(context = context)
             Log.d(TAG, "getData: getting from after $time")
             val latestValues = ValuesCollection()
             latestValues.tiltValues = Network.fetchOnePageOfValues(TILT_URL, time, token).first
@@ -67,10 +67,10 @@ object Repository {
             emit(storedValues)
 
             //Now get the rest of the data and emit it (page by page?) Använd tiden från den senaste datan här sen?
-         /*   val olderValues = Network.fetchData(token = token, start = , end = )
-            Log.d(TAG, "getData: olderDataSize")
-            emit(newerValues)
-*/
+            /*   val olderValues = Network.fetchData(token = token, start = , end = )
+               Log.d(TAG, "getData: olderDataSize")
+               emit(newerValues)
+   */
             //Store all the new data in room
             val listToStore = mutableListOf<Value>()
             Log.d(TAG, "getData: ${latestValues.tiltValues?.size} values to store")
@@ -96,6 +96,33 @@ object Repository {
 
         }.flowOn(Dispatchers.IO)
     }
+
+    fun getDataOfOneType(context: Context, token: String?, type: ValueType): Flow<List<Value>> {
+
+        val database = Room.databaseBuilder(context, Database::class.java, DATABASE_NAME).build()
+        val valuesDao = database.valueDao()
+
+        return flow {
+            val storedValues = mutableListOf<Value>()
+
+            storedValues.addAll(valuesDao.getAll(type = type))
+            Log.d(TAG, "getDataOfOneType: gotten ${storedValues.size} $type-values from database")
+
+            val time = storedValues.firstOrNull()?.timestamp ?: getStartTime(context = context)
+            Log.d(TAG, "getDataOfOneType: getting from after $time")
+            storedValues.addAll(Network.fetchPagesOfType(startTime = time, token = token, type = type))
+
+            // mpandroidchart wont draw anything that isn't sorted in ascending order
+            storedValues.sortBy { value ->
+                value.timestamp
+            }
+
+            emit(storedValues)
+        }.flowOn(Dispatchers.IO)
+    }
+
+    fun getStartTime(context: Context) =
+        context.getSharedPreferences(MainViewModel.SHARED_PREFS, Context.MODE_PRIVATE).getLong(MainViewModel.START_TIME, 0)
 
     const val DATABASE_NAME = "database-name"
     private const val TAG = "SPIN_REPOSITORY"

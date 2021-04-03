@@ -12,28 +12,34 @@ import okhttp3.Response
 object Network {
 
     fun fetchData(token: String?, start: Long, end: Long): ValuesCollection {
-        //TODO handle failures! 401! Throw exception?
         val values = ValuesCollection()
-        values.tiltValues = fetchPages(TILT_URL, token)
-        values.temperatureValues = fetchPages(TEMPERATURE_URL, token)
-        values.batteryValues = fetchPages(BATTERY_URL, token)
-        values.gravityValues = fetchPages(GRAVITY_URL, token)
-        values.rssiValues = fetchPages(RSSI_URL, token)
-        values.intervalValues = fetchPages(INTERVAL_URL, token)
+        values.tiltValues = fetchPages(TILT_URL, start, token)
+        values.temperatureValues = fetchPages(TEMPERATURE_URL, start, token)
+        values.batteryValues = fetchPages(BATTERY_URL, start, token)
+        values.gravityValues = fetchPages(GRAVITY_URL, start, token)
+        values.rssiValues = fetchPages(RSSI_URL, start, token)
+        values.intervalValues = fetchPages(INTERVAL_URL, start, token)
         return values
     }
 
-
-    private fun fetchPages(url: String, token: String?): List<Value> {
-        val values = mutableListOf<Value>()
-        var internalUrl: String? = url
+    private fun fetchPages(url: String, startTime: Long?, token: String?): List<Value> {
+        var localUrl = url
+        startTime?.let {
+            localUrl += "?start=${startTime + 1}"
+        }
+        var internalUrl: String? = localUrl
         var pages = 0
+        val values = mutableListOf<Value>()
         while (internalUrl != null && pages++ <= MAX_PAGES) {
             val onePage = fetchOnePageOfValues(internalUrl, null, token)
             values.addAll(onePage.first as? List<Value> ?: emptyList())
             internalUrl = onePage.second
         }
         return values
+    }
+
+    fun fetchPagesOfType(startTime: Long?, token: String?, type: ValueType): List<Value> {
+        return fetchPages(url = getUrlForType(type), startTime = startTime, token = token)
     }
 
     fun fetchOnePageOfValues(url: String, startTime: Long?, token: String?): Pair<List<Value>, String?> {
@@ -65,6 +71,17 @@ object Network {
         }
 
         return Pair(emptyList(), null)
+    }
+
+    private fun getUrlForType(type: ValueType): String {
+        return when(type) {
+            ValueType.TILT -> TILT_URL
+            ValueType.TEMPERATURE -> TEMPERATURE_URL
+            ValueType.BATTERY -> BATTERY_URL
+            ValueType.GRAVITY -> GRAVITY_URL
+            ValueType.RSSI -> RSSI_URL
+            ValueType.INTERVAL -> INTERVAL_URL
+        }
     }
 
     private const val VALUES_BASE_URL = "${MainViewModel.BASE_URL}devices/ispindel000/"
