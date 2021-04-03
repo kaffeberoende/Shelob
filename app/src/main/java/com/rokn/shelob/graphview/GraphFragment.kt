@@ -8,23 +8,34 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.MarkerView
+import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
-import com.rokn.shelob.rawview.RawDataFragment
+import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.utils.MPPointF
 import com.rokn.shelob.R
-import com.rokn.shelob.data.Repository
-import java.util.concurrent.TimeUnit
+import com.rokn.shelob.rawview.RawDataFragment
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+
 
 class GraphFragment: Fragment() {
 
     private val model by viewModels<GraphViewModel>()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         return inflater.inflate(R.layout.graph_fragment, container, false)
     }
 
@@ -52,43 +63,72 @@ class GraphFragment: Fragment() {
         }
 
         model.data.observe(viewLifecycleOwner, { values ->
-
-            val gravityGraph = view.findViewById<LineChart>(R.id.gravity_chart)
-
-            //TODO move to viewmodel and observe a list of Entrys?
             val gravityData = values.gravityValues.map { value ->
-                Log.d(TAG, "adding Entry(${formatTime(value.timestamp)}, ${value.value?.toFloat() ?: 0F}")
-                Entry(formatTime(value.timestamp), value.value?.toFloat() ?: 0F)
+                Entry(value.timestamp.toFloat(), value.value?.toFloat() ?: 0F)
             }
 
-            val gravityDataset = LineDataSet(gravityData, "Specific Gravity")
-            gravityDataset.setCircleColor(Color.BLUE)
-            gravityDataset.setDrawValues(true)
-            gravityGraph.data = LineData(gravityDataset)
-            gravityGraph.notifyDataSetChanged()
-            gravityGraph.invalidate()
+            val gravityGraph = view.findViewById<LineChart>(R.id.gravity_chart)
+            setupGraph(gravityGraph, gravityData, "Specific Gravity", Color.BLUE)
+
 
             val temperatureData = values.temperatureValues.map { value ->
-                Log.d(TAG, "adding Entry(${formatTime(value.timestamp)}, ${value.value?.toFloat() ?: 0F}")
-                Entry(formatTime(value.timestamp), value.value?.toFloat() ?: 0F)
+                Entry(value.timestamp.toFloat(), value.value?.toFloat() ?: 0F)
             }
 
             val temperatureGraph = view.findViewById<LineChart>(R.id.temperature_chart)
-            val temperatureDataset = LineDataSet(temperatureData, "Temperature")
-            temperatureDataset.setCircleColor(Color.RED)
-            temperatureDataset.setDrawValues(true)
-
-
-            temperatureGraph.data = LineData(temperatureDataset)
-            temperatureGraph.notifyDataSetChanged()
-            temperatureGraph.invalidate()
+            setupGraph(temperatureGraph, temperatureData, "Temperature", Color.RED)
             showProgressBar(false)
         })
     }
 
-    private fun formatTime(time: Long): Float {
-        return TimeUnit.MILLISECONDS.toMinutes(time - Repository.getStartTime(context = requireContext())).toFloat()
+    private fun setupGraph(graph: LineChart, data: List<Entry>, label: String, color: Int) {
+        val dataset = LineDataSet(data, label)
+        dataset.color = color
+        dataset.setCircleColor(color)
+        dataset.setDrawValues(true)
+        dataset.setDrawCircles(false)
+        graph.description = null
+        graph.xAxis.position = XAxis.XAxisPosition.BOTTOM
+        graph.xAxis.granularity = 4F
+        graph.xAxis.valueFormatter = object: ValueFormatter() {
+            override fun getFormattedValue(value: Float): String {
+                return getXAxisLabel(value)
+            }
+        }
+        graph.marker = object: MarkerView(requireContext(), R.layout.graph_marker) {
+            override fun refreshContent(e: Entry?, highlight: Highlight?) {
+                super.refreshContent(e, highlight)
+                findViewById<TextView>(R.id.marker_id).text = e?.y.toString()
+                findViewById<View>(R.id.marker_background).setBackgroundColor(color)
+            }
+
+            //TODO override getOffsetForDrawingAtPoint so that it doesn't draw outside the screen!
+        }
+        graph.data = LineData(dataset)
+        val highlight = Highlight(
+            dataset.values.lastOrNull()?.x ?: 0F,
+            dataset.values.lastOrNull()?.y ?: 0F,
+            0
+        )
+        highlight.dataIndex = 0
+        graph.highlightValue(highlight, false)
+        graph.setDragOffsetX(50F)
+
+        graph.post {
+            //The marker woudln't show if invalidating immediatly :)
+            graph.invalidate()
+        }
+
     }
+
+    private fun getXAxisLabel(timestamp: Float): String {
+        val localDate = LocalDateTime.ofInstant(
+            Instant.ofEpochMilli(timestamp.toLong()),
+            ZoneId.systemDefault()
+        )
+        return localDate.format(DateTimeFormatter.ofPattern("E HH:mm"))
+    }
+
 
     private fun showProgressBar(visible: Boolean) {
         Log.d(TAG, "showProgressBar: $visible")
