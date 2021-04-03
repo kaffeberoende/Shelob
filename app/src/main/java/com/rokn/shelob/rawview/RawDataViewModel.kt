@@ -1,15 +1,17 @@
-package com.rokn.shelob.ui.main
+package com.rokn.shelob.rawview
 
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.*
-import com.rokn.shelob.ui.main.data.ValuesCollection
+import com.rokn.shelob.data.LoginHelper
+import com.rokn.shelob.data.Repository
+import com.rokn.shelob.data.ValuesCollection
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class MainViewModel : ViewModel() {
+class RawDataViewModel : ViewModel() {
 
     private val _data = MutableLiveData<ValuesCollection>()
     val data: LiveData<ValuesCollection> get() = _data

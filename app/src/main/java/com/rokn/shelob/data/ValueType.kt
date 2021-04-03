@@ -1,4 +1,4 @@
-package com.rokn.shelob.ui.main
+package com.rokn.shelob.data
 
 enum class ValueType {
     TILT,

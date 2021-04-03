@@ -1,9 +1,8 @@
-package com.rokn.shelob.ui.main.database
+package com.rokn.shelob.data
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.rokn.shelob.ui.main.ValueType
 
 @Entity
 data class Value(

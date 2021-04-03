@@ -1,7 +1,6 @@
-package com.rokn.shelob.ui.main.database
+package com.rokn.shelob.data
 
 import androidx.room.TypeConverter
-import com.rokn.shelob.ui.main.ValueType
 
 class Converters {
     @TypeConverter

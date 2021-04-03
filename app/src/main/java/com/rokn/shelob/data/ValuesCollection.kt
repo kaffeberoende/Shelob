@@ -1,6 +1,4 @@
-package com.rokn.shelob.ui.main.data
-
-import com.rokn.shelob.ui.main.database.Value
+package com.rokn.shelob.data
 
 class ValuesCollection() {
     var tiltValues: List<Value>? = null

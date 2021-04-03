@@ -1,4 +1,4 @@
-package com.rokn.shelob.ui.main
+package com.rokn.shelob.graphview
 
 import android.content.Context
 import android.util.Log
@@ -6,7 +6,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rokn.shelob.ui.main.database.Value
+import com.rokn.shelob.data.LoginHelper
+import com.rokn.shelob.rawview.RawDataViewModel
+import com.rokn.shelob.data.Repository
+import com.rokn.shelob.data.ValueType
+import com.rokn.shelob.data.Value
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onStart
@@ -26,13 +30,13 @@ class GraphViewModel: ViewModel() {
     fun fetchData(context: Context) {
         var token = LoginHelper.token
         if (token == null) {
-            Log.d(MainViewModel.TAG, "fetchData: fetching stored token")
-            token = context.getSharedPreferences(MainViewModel.SHARED_PREFS, Context.MODE_PRIVATE)
-                .getString(MainViewModel.TOKEN, null)
+            Log.d(RawDataViewModel.TAG, "fetchData: fetching stored token")
+            token = context.getSharedPreferences(RawDataViewModel.SHARED_PREFS, Context.MODE_PRIVATE)
+                .getString(RawDataViewModel.TOKEN, null)
         }
 
         if (token == null) {
-            Log.d(MainViewModel.TAG, "fetchData: no stored token, returning")
+            Log.d(RawDataViewModel.TAG, "fetchData: no stored token, returning")
             isLoggedIn.value = false
             return
         }
@@ -41,7 +45,7 @@ class GraphViewModel: ViewModel() {
             Repository.getDataOfOneType(context = context, token = token, type = ValueType.GRAVITY)
                 .onStart { /* _foo.value = loading state */ }
                 .catch { exception ->
-                    Log.d(MainViewModel.TAG, "fetchData: exception: $exception")
+                    Log.d(RawDataViewModel.TAG, "fetchData: exception: $exception")
                     isLoggedIn.value = false
                 }
                 .collect { values ->

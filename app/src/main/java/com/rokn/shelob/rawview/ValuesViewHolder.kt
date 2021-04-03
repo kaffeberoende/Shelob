@@ -1,4 +1,4 @@
-package com.rokn.shelob.ui.main
+package com.rokn.shelob.rawview
 
 import android.view.View
 import android.widget.TextView

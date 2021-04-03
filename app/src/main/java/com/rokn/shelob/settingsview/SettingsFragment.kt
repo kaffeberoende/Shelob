@@ -1,12 +1,10 @@
-package com.rokn.shelob.ui.main
+package com.rokn.shelob
 
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.app.TimePickerDialog
 import android.content.Context
-import android.icu.text.DateFormat
 import android.os.Bundle
-import android.text.format.DateFormat.is24HourFormat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -20,10 +18,10 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
-import com.rokn.shelob.R
-import com.rokn.shelob.ui.main.SettingsFragment.Companion.TAG
-import com.rokn.shelob.ui.main.database.Database
-import kotlinx.coroutines.CoroutineScope
+import com.rokn.shelob.SettingsFragment.Companion.TAG
+import com.rokn.shelob.data.Database
+import com.rokn.shelob.data.Repository
+import com.rokn.shelob.rawview.RawDataViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
@@ -42,12 +40,12 @@ class SettingsFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val apiKeyInput = view.findViewById<EditText>(R.id.api_key_input)
-        val prefs = requireContext().getSharedPreferences(MainViewModel.SHARED_PREFS, Context.MODE_PRIVATE)
+        val prefs = requireContext().getSharedPreferences(RawDataViewModel.SHARED_PREFS, Context.MODE_PRIVATE)
 
-        apiKeyInput.setText(prefs?.getString(MainViewModel.API_KEY, "no key"))
+        apiKeyInput.setText(prefs?.getString(RawDataViewModel.API_KEY, "no key"))
         view.findViewById<Button>(R.id.api_key_button).setOnClickListener {
             prefs?.edit(commit = true) {
-                putString(MainViewModel.API_KEY, apiKeyInput.text.toString())
+                putString(RawDataViewModel.API_KEY, apiKeyInput.text.toString())
                 Log.d(TAG, "api key stored")
             }
 
@@ -56,7 +54,7 @@ class SettingsFragment: Fragment() {
         val deviceNameInput = view.findViewById<EditText>(R.id.device_name_input)
         view.findViewById<Button>(R.id.device_name_button).setOnClickListener {
             prefs?.edit(commit = true) {
-                putString(MainViewModel.DEVICE_NAME, deviceNameInput.text.toString())
+                putString(RawDataViewModel.DEVICE_NAME, deviceNameInput.text.toString())
                 Log.d(TAG, "device name stored")
             }
         }
@@ -105,9 +103,9 @@ class TimePickerFragment(private val year: Int, private val month: Int, val day:
         val c = Calendar.getInstance()
         c.set(year, month, day, hourOfDay, minute)
         Log.d(TAG, "onTimeSet: $c")
-        val prefs = requireContext().getSharedPreferences(MainViewModel.SHARED_PREFS, Context.MODE_PRIVATE)
+        val prefs = requireContext().getSharedPreferences(RawDataViewModel.SHARED_PREFS, Context.MODE_PRIVATE)
         prefs?.edit(commit = true) {
-            putLong(MainViewModel.START_TIME, c.timeInMillis)
+            putLong(RawDataViewModel.START_TIME, c.timeInMillis)
         }
     }
 }

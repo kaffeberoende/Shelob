@@ -11,7 +11,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Shelob">
-        <activity android:name="com.rokn.shelob.MainActivity">
+        <activity android:name="com.rokn.shelob.main.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

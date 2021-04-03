@@ -1,4 +1,4 @@
-package com.rokn.shelob.ui.main
+package com.rokn.shelob.graphview
 
 import android.os.Bundle
 import android.util.Log
@@ -13,7 +13,9 @@ import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.rokn.shelob.rawview.RawDataFragment
 import com.rokn.shelob.R
+import com.rokn.shelob.data.Repository
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -23,7 +25,7 @@ class GraphFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.graph_layout, container, false)
+        return inflater.inflate(R.layout.graph_fragment, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -40,7 +42,7 @@ class GraphFragment: Fragment() {
             model.fetchData(requireContext())
 
         } else {
-            Log.d(MainFragment.TAG, "Not logged in")
+            Log.d(RawDataFragment.TAG, "Not logged in")
             loginButton.visibility = View.VISIBLE
         }
 

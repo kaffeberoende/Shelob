@@ -23,8 +23,7 @@
             android:layout_height="wrap_content"
             android:text="@string/refresh_button"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:visibility="gone"/>
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/line_chart"

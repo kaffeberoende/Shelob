@@ -1,4 +1,4 @@
-package com.rokn.shelob.ui.main.database
+package com.rokn.shelob.data
 
 import androidx.room.RoomDatabase
 import androidx.room.Database

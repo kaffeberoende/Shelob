@@ -1,10 +1,9 @@
-package com.rokn.shelob.ui.main.database
+package com.rokn.shelob.data
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import com.rokn.shelob.ui.main.ValueType
 
 @Dao
 interface ValueDao {

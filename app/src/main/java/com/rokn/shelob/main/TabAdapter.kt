@@ -1,11 +1,12 @@
-package com.rokn.shelob
+package com.rokn.shelob.main
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.rokn.shelob.ui.main.GraphFragment
-import com.rokn.shelob.ui.main.MainFragment
-import com.rokn.shelob.ui.main.SettingsFragment
+import com.rokn.shelob.R
+import com.rokn.shelob.SettingsFragment
+import com.rokn.shelob.graphview.GraphFragment
+import com.rokn.shelob.rawview.RawDataFragment
 
 class TabAdapter(private val fragmentActivity: FragmentActivity) : FragmentStateAdapter(fragmentActivity) {
 
@@ -14,7 +15,7 @@ class TabAdapter(private val fragmentActivity: FragmentActivity) : FragmentState
     override fun createFragment(position: Int): Fragment {
         return when(position) {
             0 -> GraphFragment()
-            1 -> MainFragment()
+            1 -> RawDataFragment()
             else -> SettingsFragment()
         }
     }

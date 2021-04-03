@@ -1,6 +1,4 @@
-package com.rokn.shelob.ui.main.data
-
-import com.rokn.shelob.ui.main.database.Value
+package com.rokn.shelob.data
 
 data class ValuesResponse(
     val next: String?,

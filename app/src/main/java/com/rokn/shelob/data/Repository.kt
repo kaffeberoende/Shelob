@@ -1,17 +1,15 @@
-package com.rokn.shelob.ui.main
+package com.rokn.shelob.data
 
 import android.content.Context
 import android.util.Log
 import androidx.room.Room
-import com.rokn.shelob.ui.main.Network.BATTERY_URL
-import com.rokn.shelob.ui.main.Network.GRAVITY_URL
-import com.rokn.shelob.ui.main.Network.INTERVAL_URL
-import com.rokn.shelob.ui.main.Network.RSSI_URL
-import com.rokn.shelob.ui.main.Network.TEMPERATURE_URL
-import com.rokn.shelob.ui.main.Network.TILT_URL
-import com.rokn.shelob.ui.main.data.ValuesCollection
-import com.rokn.shelob.ui.main.database.Database
-import com.rokn.shelob.ui.main.database.Value
+import com.rokn.shelob.data.Network.BATTERY_URL
+import com.rokn.shelob.data.Network.GRAVITY_URL
+import com.rokn.shelob.data.Network.INTERVAL_URL
+import com.rokn.shelob.data.Network.RSSI_URL
+import com.rokn.shelob.data.Network.TEMPERATURE_URL
+import com.rokn.shelob.data.Network.TILT_URL
+import com.rokn.shelob.rawview.RawDataViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -46,7 +44,11 @@ object Repository {
             storedValues.tiltValues = (latestValues.tiltValues ?: emptyList()) + (storedValues.tiltValues ?: emptyList())
             emit(storedValues)
 
-            latestValues.temperatureValues = Network.fetchOnePageOfValues(TEMPERATURE_URL, time, token).first
+            latestValues.temperatureValues = Network.fetchOnePageOfValues(
+                TEMPERATURE_URL,
+                time,
+                token
+            ).first
             storedValues.temperatureValues = (latestValues.temperatureValues ?: emptyList()) + (storedValues.temperatureValues ?: emptyList())
             emit(storedValues)
 
@@ -110,7 +112,13 @@ object Repository {
 
             val time = storedValues.firstOrNull()?.timestamp ?: getStartTime(context = context)
             Log.d(TAG, "getDataOfOneType: getting from after $time")
-            storedValues.addAll(Network.fetchPagesOfType(startTime = time, token = token, type = type))
+            storedValues.addAll(
+                Network.fetchPagesOfType(
+                    startTime = time,
+                    token = token,
+                    type = type
+                )
+            )
 
             // mpandroidchart wont draw anything that isn't sorted in ascending order
             storedValues.sortBy { value ->
@@ -122,7 +130,8 @@ object Repository {
     }
 
     fun getStartTime(context: Context) =
-        context.getSharedPreferences(MainViewModel.SHARED_PREFS, Context.MODE_PRIVATE).getLong(MainViewModel.START_TIME, 0)
+        context.getSharedPreferences(RawDataViewModel.SHARED_PREFS, Context.MODE_PRIVATE).getLong(
+            RawDataViewModel.START_TIME, 0)
 
     const val DATABASE_NAME = "database-name"
     private const val TAG = "SPIN_REPOSITORY"

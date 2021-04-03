@@ -1,14 +1,14 @@
-package com.rokn.shelob.ui.main
+package com.rokn.shelob.rawview
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.rokn.shelob.R
-import com.rokn.shelob.ui.main.data.ValuesCollection
+import com.rokn.shelob.data.ValuesCollection
 import java.text.SimpleDateFormat
 import java.util.*
 
-class TiltAdapter(): RecyclerView.Adapter<ValuesViewHolder>() {
+class TiltAdapter: RecyclerView.Adapter<ValuesViewHolder>() {
 
     var values = ValuesCollection()
 

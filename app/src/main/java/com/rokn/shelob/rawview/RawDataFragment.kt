@@ -1,4 +1,4 @@
-package com.rokn.shelob.ui.main
+package com.rokn.shelob.rawview
 
 import android.os.Bundle
 import android.util.Log
@@ -15,9 +15,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.rokn.shelob.R
 
-class MainFragment : Fragment() {
+class RawDataFragment : Fragment() {
 
-    private val model by viewModels<MainViewModel>()
+    private val model by viewModels<RawDataViewModel>()
     private val adapter = TiltAdapter()
     private lateinit var recyclerView: RecyclerView
     private lateinit var loginButton: Button

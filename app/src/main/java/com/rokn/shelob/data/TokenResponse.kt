@@ -1,4 +1,4 @@
-package com.rokn.shelob.ui.main.data
+package com.rokn.shelob.data
 
 data class TokenResponse(
     val token: String?

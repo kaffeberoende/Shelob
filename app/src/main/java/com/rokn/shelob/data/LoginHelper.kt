@@ -1,4 +1,4 @@
-package com.rokn.shelob.ui.main
+package com.rokn.shelob.data
 
 import android.content.Context
 import android.util.Log
@@ -6,7 +6,7 @@ import android.widget.Toast
 import androidx.core.content.edit
 import com.google.gson.Gson
 import com.rokn.shelob.R
-import com.rokn.shelob.ui.main.data.TokenResponse
+import com.rokn.shelob.rawview.RawDataViewModel
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -18,9 +18,9 @@ object LoginHelper {
     var token: String? = null
 
     fun login(context: Context): Boolean {
-        Log.d(MainViewModel.TAG, "login: ")
-        val apiKey = context.getSharedPreferences(MainViewModel.SHARED_PREFS, Context.MODE_PRIVATE).getString(
-            MainViewModel.API_KEY, null
+        Log.d(RawDataViewModel.TAG, "login: ")
+        val apiKey = context.getSharedPreferences(RawDataViewModel.SHARED_PREFS, Context.MODE_PRIVATE).getString(
+            RawDataViewModel.API_KEY, null
         )
         if (apiKey != null) {
             val client = OkHttpClient().newBuilder()
@@ -28,9 +28,9 @@ object LoginHelper {
             val mediaType: MediaType = "text/plain".toMediaType()
             val body: RequestBody = "".toRequestBody(mediaType)
             val request = Request.Builder()
-                .url(MainViewModel.TOKEN_URL)
+                .url(RawDataViewModel.TOKEN_URL)
                 .method("POST", body)
-                .addHeader(MainViewModel.API_KEY_HEADER, apiKey)
+                .addHeader(RawDataViewModel.API_KEY_HEADER, apiKey)
                 .build()
             val response = client.newCall(request).execute()
             if (response.isSuccessful) {
@@ -40,16 +40,16 @@ object LoginHelper {
                         gson.fromJson<TokenResponse>(
                             it, TokenResponse::class.java
                         ).token ?: ""
-                    context.getSharedPreferences(MainViewModel.SHARED_PREFS, Context.MODE_PRIVATE)
+                    context.getSharedPreferences(RawDataViewModel.SHARED_PREFS, Context.MODE_PRIVATE)
                         .edit(commit = true) {
-                            putString(MainViewModel.TOKEN, token)
+                            putString(RawDataViewModel.TOKEN, token)
                         }
                     return true
 
                 }
 
             } else {
-                Log.d(MainViewModel.TAG, "login: failed to login")
+                Log.d(RawDataViewModel.TAG, "login: failed to login")
 
             }
         } else {
