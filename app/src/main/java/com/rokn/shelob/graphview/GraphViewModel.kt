@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rokn.shelob.data.*
 import com.rokn.shelob.rawview.RawDataViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onStart
@@ -21,7 +22,10 @@ class GraphViewModel: ViewModel() {
     val isLoggedIn = MutableLiveData(true)
 
     fun login(context: Context) {
-        isLoggedIn.value = LoginHelper.login(context)
+        val loggedIn = LoginHelper.login(context)
+        viewModelScope.launch(Dispatchers.Main) {
+            isLoggedIn.value = loggedIn
+        }
     }
 
     fun fetchData(context: Context) {

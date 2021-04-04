@@ -10,10 +10,13 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.rokn.shelob.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class RawDataFragment : Fragment() {
 
@@ -36,7 +39,9 @@ class RawDataFragment : Fragment() {
 
         loginButton = view.findViewById(R.id.loginbutton)
         loginButton.setOnClickListener {
-            model.login(requireContext())
+            lifecycleScope.launch(Dispatchers.IO) {
+                model.login(requireContext())
+            }
         }
 
         recyclerView.layoutManager = LinearLayoutManager(context)

@@ -11,6 +11,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.MarkerView
 import com.github.mikephil.charting.components.XAxis
@@ -19,9 +20,10 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
-import com.github.mikephil.charting.utils.MPPointF
 import com.rokn.shelob.R
 import com.rokn.shelob.rawview.RawDataFragment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -44,7 +46,9 @@ class GraphFragment: Fragment() {
 
         val loginButton = view.findViewById<Button>(R.id.loginbutton)
         loginButton.setOnClickListener {
-            model.login(requireContext())
+            lifecycleScope.launch(Dispatchers.IO) {
+                model.login(requireContext())
+            }
         }
 
         if (model.isLoggedIn.value == true) {
@@ -78,6 +82,18 @@ class GraphFragment: Fragment() {
             val temperatureGraph = view.findViewById<LineChart>(R.id.temperature_chart)
             setupGraph(temperatureGraph, temperatureData, "Temperature", Color.RED)
             showProgressBar(false)
+        })
+
+
+        model.isLoggedIn.observe(viewLifecycleOwner, {
+            Log.d(RawDataFragment.TAG, "observed login: $it")
+            if (it) {
+                loginButton.visibility = View.GONE
+                showProgressBar(true)
+                model.fetchData(requireContext())
+            } else {
+                loginButton.visibility = View.VISIBLE
+            }
         })
     }
 
