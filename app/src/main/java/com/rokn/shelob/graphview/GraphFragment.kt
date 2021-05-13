@@ -101,7 +101,7 @@ class GraphFragment: Fragment() {
         val dataset = LineDataSet(data, label)
         dataset.color = color
         dataset.setCircleColor(color)
-        dataset.setDrawValues(true)
+        dataset.setDrawValues(false)
         dataset.setDrawCircles(false)
         graph.description = null
         graph.xAxis.position = XAxis.XAxisPosition.BOTTOM
@@ -112,10 +112,11 @@ class GraphFragment: Fragment() {
             }
         }
         graph.marker = object: MarkerView(requireContext(), R.layout.graph_marker) {
-            override fun refreshContent(e: Entry?, highlight: Highlight?) {
+            override fun refreshContent(e: Entry, highlight: Highlight?) {
                 super.refreshContent(e, highlight)
-                findViewById<TextView>(R.id.marker_id).text = e?.y.toString()
-                findViewById<View>(R.id.marker_background).setBackgroundColor(color)
+                findViewById<TextView>(R.id.marker_time).text = getXAxisLabel(e.x)
+                findViewById<TextView>(R.id.marker_gravity).text = e.y.toString()
+                setBackgroundColor(color)
             }
 
             //TODO override getOffsetForDrawingAtPoint so that it doesn't draw outside the screen!
