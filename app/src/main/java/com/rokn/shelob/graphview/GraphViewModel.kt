@@ -31,13 +31,13 @@ class GraphViewModel: ViewModel() {
     fun fetchData(context: Context) {
         var token = LoginHelper.token
         if (token == null) {
-            Log.d(RawDataViewModel.TAG, "fetchData: fetching stored token")
+            Log.d(TAG, "fetchData: fetching stored token")
             token = context.getSharedPreferences(RawDataViewModel.SHARED_PREFS, Context.MODE_PRIVATE)
                 .getString(RawDataViewModel.TOKEN, null)
         }
 
         if (token == null) {
-            Log.d(RawDataViewModel.TAG, "fetchData: no stored token, returning")
+            Log.d(TAG, "fetchData: no stored token, returning")
             isLoggedIn.value = false
             return
         }
@@ -46,12 +46,16 @@ class GraphViewModel: ViewModel() {
             Repository.getDataOfOneType(context = context, token = token, ValueType.GRAVITY, ValueType.TEMPERATURE)
                 .onStart { /* _foo.value = loading state */ }
                 .catch { exception ->
-                    Log.d(RawDataViewModel.TAG, "fetchData: exception: $exception")
+                    Log.d(TAG, "fetchData: exception: $exception")
                     isLoggedIn.value = false
                 }
                 .collect { values ->
                     _data.value = values
                 }
         }
+    }
+
+    companion object {
+        private const val TAG = "SPINDEL GRAPH MODEL"
     }
 }

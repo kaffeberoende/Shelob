@@ -4,7 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.rokn.shelob.R
-import com.rokn.shelob.SettingsFragment
+import com.rokn.shelob.settingsview.SettingsFragment
 import com.rokn.shelob.graphview.GraphFragment
 import com.rokn.shelob.rawview.RawDataFragment
 

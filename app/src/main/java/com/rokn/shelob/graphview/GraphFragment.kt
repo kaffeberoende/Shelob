@@ -67,7 +67,7 @@ class GraphFragment: Fragment() {
         }
 
         model.data.observe(viewLifecycleOwner, { values ->
-            val gravityData = values.gravityValues.map { value ->
+            val gravityData = values.calibratedGravityValues.map { value ->
                 Entry(value.timestamp.toFloat(), value.value?.toFloat() ?: 0F)
             }
 
@@ -80,7 +80,7 @@ class GraphFragment: Fragment() {
             }
 
             val temperatureGraph = view.findViewById<LineChart>(R.id.temperature_chart)
-            setupGraph(temperatureGraph, temperatureData, "Temperature", Color.RED)
+            setupGraph(temperatureGraph, temperatureData, "Temperature", Color.RED, unit = "°C")
             showProgressBar(false)
         })
 
@@ -97,12 +97,13 @@ class GraphFragment: Fragment() {
         })
     }
 
-    private fun setupGraph(graph: LineChart, data: List<Entry>, label: String, color: Int) {
+    private fun setupGraph(graph: LineChart, data: List<Entry>, label: String, color: Int, unit: String? = null) {
         val dataset = LineDataSet(data, label)
         dataset.color = color
         dataset.setCircleColor(color)
         dataset.setDrawValues(false)
         dataset.setDrawCircles(false)
+        dataset.setDrawHighlightIndicators(true)
         graph.description = null
         graph.xAxis.position = XAxis.XAxisPosition.BOTTOM
         graph.xAxis.granularity = 4F
@@ -114,9 +115,12 @@ class GraphFragment: Fragment() {
         graph.marker = object: MarkerView(requireContext(), R.layout.graph_marker) {
             override fun refreshContent(e: Entry, highlight: Highlight?) {
                 super.refreshContent(e, highlight)
-                findViewById<TextView>(R.id.marker_time).text = getXAxisLabel(e.x)
-                findViewById<TextView>(R.id.marker_gravity).text = e.y.toString()
-                setBackgroundColor(color)
+                val markerTime = findViewById<TextView>(R.id.marker_time)
+                markerTime.text = getXAxisLabel(e.x)
+                markerTime.setTextColor(color)
+                val markerValue = findViewById<TextView>(R.id.marker_value)
+                markerValue.text = e.y.toString() + unit.orEmpty()
+                markerValue.setTextColor(color)
             }
 
             //TODO override getOffsetForDrawingAtPoint so that it doesn't draw outside the screen!

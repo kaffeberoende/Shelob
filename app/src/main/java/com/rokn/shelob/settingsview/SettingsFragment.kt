@@ -1,4 +1,4 @@
-package com.rokn.shelob
+package com.rokn.shelob.settingsview
 
 import android.app.DatePickerDialog
 import android.app.Dialog
@@ -18,7 +18,8 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
-import com.rokn.shelob.SettingsFragment.Companion.TAG
+import com.rokn.shelob.R
+import com.rokn.shelob.settingsview.SettingsFragment.Companion.TAG
 import com.rokn.shelob.data.Database
 import com.rokn.shelob.data.Repository
 import com.rokn.shelob.rawview.RawDataViewModel
@@ -71,6 +72,15 @@ class SettingsFragment: Fragment() {
 
         view.findViewById<Button>(R.id.start_time_picker).setOnClickListener {
             DatePickerFragment().show(parentFragmentManager, "datepicker")
+        }
+
+        val calibrationInput = view.findViewById<EditText>(R.id.calibration_input)
+        view.findViewById<Button>(R.id.calibration_button).setOnClickListener {
+            prefs?.edit(commit = true) {
+                val value = if (calibrationInput.text.toString().isEmpty()) "0" else calibrationInput.text.toString()
+                putFloat(RawDataViewModel.CALIBRATION, value.toFloat())
+                Log.d(TAG, "calibration stored")
+            }
         }
     }
 }

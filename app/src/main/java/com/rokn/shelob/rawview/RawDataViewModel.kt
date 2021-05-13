@@ -58,6 +58,7 @@ class RawDataViewModel : ViewModel() {
         const val API_KEY_HEADER = "x-ubidots-apikey"
         const val API_KEY = "api_key"
         const val DEVICE_NAME = "device_name"
+        const val CALIBRATION = "calibration"
         const val TOKEN_HEADER = "X-Auth-Token"
         const val START_TIME = "start_time"
     }

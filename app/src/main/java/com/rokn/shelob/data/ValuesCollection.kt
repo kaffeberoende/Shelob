@@ -7,6 +7,7 @@ class ValuesCollection {
     var gravityValues: MutableList<Value> = mutableListOf()
     var rssiValues: MutableList<Value> = mutableListOf()
     var intervalValues: MutableList<Value> = mutableListOf()
+    var calibratedGravityValues: MutableList<Value> = mutableListOf()
 
     fun addAllForType(values: List<Value>, type: ValueType) {
         when(type) {
@@ -16,6 +17,7 @@ class ValuesCollection {
             ValueType.GRAVITY -> gravityValues.addAll(values)
             ValueType.RSSI -> rssiValues.addAll(values)
             ValueType.INTERVAL -> intervalValues.addAll(values)
+            ValueType.CALIBRATED_GRAVITY -> calibratedGravityValues.addAll(values)
         }
     }
 
@@ -27,6 +29,7 @@ class ValuesCollection {
             ValueType.GRAVITY -> gravityValues
             ValueType.RSSI -> rssiValues
             ValueType.INTERVAL -> intervalValues
+            ValueType.CALIBRATED_GRAVITY -> calibratedGravityValues
         }
     }
 }

@@ -81,6 +81,30 @@ object Repository {
                 storedValues.addAllForType(
                     Network.fetchPagesOfType(startTime = time, token = token, type = it), it)
 
+                //TODO Fulfix för calibration
+                if (it == ValueType.GRAVITY) {
+                    val cali = context.getSharedPreferences(
+                        RawDataViewModel.SHARED_PREFS,
+                        Context.MODE_PRIVATE
+                    ).getFloat(
+                        RawDataViewModel.CALIBRATION, 0F
+                    )
+                    val calibratedGravity = storedValues.gravityValues.map { g ->
+                        Value(
+                            uid = g.uid,
+                            type = ValueType.CALIBRATED_GRAVITY,
+                            timestamp = g.timestamp,
+                            created_at = g.created_at,
+                            value = (g.value?.toFloat()?.plus(cali)).toString()
+                        )
+                    }
+                    storedValues.addAllForType(calibratedGravity, ValueType.CALIBRATED_GRAVITY)
+                    // mpandroidchart wont draw anything that isn't sorted in ascending order
+                    storedValues.getValuesForType(ValueType.CALIBRATED_GRAVITY).sortBy { value ->
+                        value.timestamp
+                    }
+                }
+
                 // mpandroidchart wont draw anything that isn't sorted in ascending order
                 storedValues.getValuesForType(it).sortBy { value ->
                     value.timestamp
@@ -91,7 +115,7 @@ object Repository {
         }.flowOn(Dispatchers.IO)
     }
 
-    fun getStartTime(context: Context) =
+    private fun getStartTime(context: Context) =
         context.getSharedPreferences(RawDataViewModel.SHARED_PREFS, Context.MODE_PRIVATE).getLong(
             RawDataViewModel.START_TIME, 0)
 

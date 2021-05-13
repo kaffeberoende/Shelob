@@ -19,7 +19,7 @@
             tools:text="Mån 17:15" />
 
         <TextView
-            android:id="@+id/marker_gravity"
+            android:id="@+id/marker_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingHorizontal="8dp"

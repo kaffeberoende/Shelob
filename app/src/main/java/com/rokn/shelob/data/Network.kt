@@ -69,6 +69,7 @@ object Network {
             ValueType.GRAVITY -> GRAVITY_URL
             ValueType.RSSI -> RSSI_URL
             ValueType.INTERVAL -> INTERVAL_URL
+            ValueType.CALIBRATED_GRAVITY -> ""
         }
     }
 

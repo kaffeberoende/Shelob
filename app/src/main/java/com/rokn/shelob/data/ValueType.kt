@@ -6,5 +6,6 @@ enum class ValueType {
     GRAVITY,
     BATTERY,
     RSSI,
-    INTERVAL
+    INTERVAL,
+    CALIBRATED_GRAVITY
 }

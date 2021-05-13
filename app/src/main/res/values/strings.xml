@@ -13,6 +13,8 @@
     <string name="end_date">Select end date for all data</string>
     <string name="clear_data">Clear data</string>
     <string name="pick_start_time">Set start time</string>
+    <string name="calibration">Calibration value</string>
+    <string name="calibration_hint">Quick fix for uncalibrated iSpindel</string>
 
     <string name="no_api_key_set">No api key set! \nGo to settings and add your api key from Ubidots.</string>
 

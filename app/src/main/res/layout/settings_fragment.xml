@@ -76,4 +76,32 @@
         android:id="@+id/start_time_picker"
         android:text="@string/pick_start_time"/>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/start_time_picker"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:id="@+id/calibration_text"
+        android:text="@string/calibration" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/calibration_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:inputType="numberDecimal|numberSigned"
+        android:id="@+id/calibration_input"
+        android:maxLines="1"
+        android:hint="@string/calibration_hint"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/calibration_input"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:id="@+id/calibration_button"
+        android:text="@android:string/ok"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
