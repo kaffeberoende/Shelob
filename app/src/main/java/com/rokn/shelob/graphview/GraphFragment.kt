@@ -73,6 +73,11 @@ class GraphFragment: Fragment() {
 
             val temperatureGraph = view.findViewById<LineChart>(R.id.temperature_chart)
             setupGraph(temperatureGraph, temperatureData, "Temperature", Color.RED, unit = "°C")
+
+            val batteryLevelIndicator = view.findViewById<TextView>(R.id.battery_level)
+            val latestVoltage = values.batteryValues.lastOrNull()?.value
+            batteryLevelIndicator.text = getString(R.string.battery_voltage, latestVoltage ?: 0F)
+
             showProgressBar(false)
         })
 

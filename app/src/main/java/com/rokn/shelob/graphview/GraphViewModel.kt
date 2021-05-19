@@ -42,7 +42,7 @@ class GraphViewModel: ViewModel() {
         }
 
         viewModelScope.launch {
-            Repository.getDataOfOneType(context = context, token = token, ValueType.GRAVITY, ValueType.TEMPERATURE)
+            Repository.getDataOfOneType(context = context, token = token, ValueType.GRAVITY, ValueType.TEMPERATURE, ValueType.BATTERY)
                 .onStart { /* _foo.value = loading state */ }
                 .catch { exception ->
                     Log.d(TAG, "fetchData: exception: $exception")
