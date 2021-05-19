@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.room.Room
 import com.rokn.shelob.data.Network.getUrlForType
-import com.rokn.shelob.rawview.RawDataViewModel
+import com.rokn.shelob.graphview.GraphViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -84,10 +84,10 @@ object Repository {
                 //TODO Fulfix för calibration
                 if (it == ValueType.GRAVITY) {
                     val cali = context.getSharedPreferences(
-                        RawDataViewModel.SHARED_PREFS,
+                        GraphViewModel.SHARED_PREFS,
                         Context.MODE_PRIVATE
                     ).getFloat(
-                        RawDataViewModel.CALIBRATION, 0F
+                        GraphViewModel.CALIBRATION, 0F
                     )
                     val calibratedGravity = storedValues.gravityValues.map { g ->
                         Value(
@@ -116,8 +116,8 @@ object Repository {
     }
 
     private fun getStartTime(context: Context) =
-        context.getSharedPreferences(RawDataViewModel.SHARED_PREFS, Context.MODE_PRIVATE).getLong(
-            RawDataViewModel.START_TIME, 0)
+        context.getSharedPreferences(GraphViewModel.SHARED_PREFS, Context.MODE_PRIVATE).getLong(
+            GraphViewModel.START_TIME, 0)
 
     const val DATABASE_NAME = "database-name"
     private const val TAG = "SPIN_REPOSITORY"

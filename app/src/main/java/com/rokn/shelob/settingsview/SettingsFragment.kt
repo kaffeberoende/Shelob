@@ -22,7 +22,7 @@ import com.rokn.shelob.R
 import com.rokn.shelob.settingsview.SettingsFragment.Companion.TAG
 import com.rokn.shelob.data.Database
 import com.rokn.shelob.data.Repository
-import com.rokn.shelob.rawview.RawDataViewModel
+import com.rokn.shelob.graphview.GraphViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
@@ -41,12 +41,12 @@ class SettingsFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val apiKeyInput = view.findViewById<EditText>(R.id.api_key_input)
-        val prefs = requireContext().getSharedPreferences(RawDataViewModel.SHARED_PREFS, Context.MODE_PRIVATE)
+        val prefs = requireContext().getSharedPreferences(GraphViewModel.SHARED_PREFS, Context.MODE_PRIVATE)
 
-        apiKeyInput.setText(prefs?.getString(RawDataViewModel.API_KEY, "no key"))
+        apiKeyInput.setText(prefs?.getString(GraphViewModel.API_KEY, "no key"))
         view.findViewById<Button>(R.id.api_key_button).setOnClickListener {
             prefs?.edit(commit = true) {
-                putString(RawDataViewModel.API_KEY, apiKeyInput.text.toString())
+                putString(GraphViewModel.API_KEY, apiKeyInput.text.toString())
                 Log.d(TAG, "api key stored")
             }
 
@@ -55,7 +55,7 @@ class SettingsFragment: Fragment() {
         val deviceNameInput = view.findViewById<EditText>(R.id.device_name_input)
         view.findViewById<Button>(R.id.device_name_button).setOnClickListener {
             prefs?.edit(commit = true) {
-                putString(RawDataViewModel.DEVICE_NAME, deviceNameInput.text.toString())
+                putString(GraphViewModel.DEVICE_NAME, deviceNameInput.text.toString())
                 Log.d(TAG, "device name stored")
             }
         }
@@ -78,7 +78,7 @@ class SettingsFragment: Fragment() {
         view.findViewById<Button>(R.id.calibration_button).setOnClickListener {
             prefs?.edit(commit = true) {
                 val value = if (calibrationInput.text.toString().isEmpty()) "0" else calibrationInput.text.toString()
-                putFloat(RawDataViewModel.CALIBRATION, value.toFloat())
+                putFloat(GraphViewModel.CALIBRATION, value.toFloat())
                 Log.d(TAG, "calibration stored")
             }
         }
@@ -113,9 +113,9 @@ class TimePickerFragment(private val year: Int, private val month: Int, val day:
         val c = Calendar.getInstance()
         c.set(year, month, day, hourOfDay, minute)
         Log.d(TAG, "onTimeSet: $c")
-        val prefs = requireContext().getSharedPreferences(RawDataViewModel.SHARED_PREFS, Context.MODE_PRIVATE)
+        val prefs = requireContext().getSharedPreferences(GraphViewModel.SHARED_PREFS, Context.MODE_PRIVATE)
         prefs?.edit(commit = true) {
-            putLong(RawDataViewModel.START_TIME, c.timeInMillis)
+            putLong(GraphViewModel.START_TIME, c.timeInMillis)
         }
     }
 }

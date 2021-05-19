@@ -21,7 +21,6 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
 import com.rokn.shelob.R
-import com.rokn.shelob.rawview.RawDataFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -48,7 +47,7 @@ class GraphFragment: Fragment() {
             showProgressBar(true)
             model.fetchData(requireContext())
         } else {
-            Log.d(RawDataFragment.TAG, "Logging in")
+            Log.d(TAG, "Logging in")
             lifecycleScope.launch(Dispatchers.IO) {
                 model.login(requireContext())
             }
@@ -78,12 +77,12 @@ class GraphFragment: Fragment() {
         })
 
         model.isLoggedIn.observe(viewLifecycleOwner, {
-            Log.d(RawDataFragment.TAG, "observed login: $it")
+            Log.d(TAG, "observed login: $it")
             if (it) {
                 showProgressBar(true)
                 model.fetchData(requireContext())
             } else {
-                Log.d(RawDataFragment.TAG, "Logging in")
+                Log.d(TAG, "Logging in")
                 lifecycleScope.launch(Dispatchers.IO) {
                     model.login(requireContext())
                 }

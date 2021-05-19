@@ -2,7 +2,7 @@ package com.rokn.shelob.data
 
 import android.util.Log
 import com.google.gson.Gson
-import com.rokn.shelob.rawview.RawDataViewModel
+import com.rokn.shelob.graphview.GraphViewModel
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -18,20 +18,20 @@ object Network {
         startTime?.let {
             localUrl += "?start=${startTime + 1}"
         }
-        Log.d(RawDataViewModel.TAG, "fetchOnePageOfValues: $localUrl")
+        Log.d(TAG, "fetchOnePageOfValues: $localUrl")
         val client: OkHttpClient = OkHttpClient().newBuilder()
             .build()
         val request: Request = Request.Builder()
             .url(localUrl)
             .method("GET", null)
             .addHeader(
-                RawDataViewModel.TOKEN_HEADER,
+                GraphViewModel.TOKEN_HEADER,
                 token.orEmpty()
             )
             .build()
         val response: Response = client.newCall(request).execute()
         if (response.isSuccessful) {
-            Log.d(RawDataViewModel.TAG, "fetchOnePageOfValues: success")
+            Log.d(TAG, "fetchOnePageOfValues: success")
             response.body?.string()?.let {
                 val gson = Gson()
                 val resp = gson.fromJson(it, ValuesResponse::class.java)
@@ -73,7 +73,7 @@ object Network {
         }
     }
 
-    private const val VALUES_BASE_URL = "${RawDataViewModel.BASE_URL}devices/ispindel000/"
+    private const val VALUES_BASE_URL = "${GraphViewModel.BASE_URL}devices/ispindel000/"
     private const val TILT_URL = "${VALUES_BASE_URL}tilt/values/"
     private const val TEMPERATURE_URL = "${VALUES_BASE_URL}temperature/values/"
     private const val BATTERY_URL = "${VALUES_BASE_URL}battery/values/"
@@ -81,4 +81,5 @@ object Network {
     private const val RSSI_URL = "${VALUES_BASE_URL}rssi/values/"
     private const val INTERVAL_URL = "${VALUES_BASE_URL}interval/values/"
     private const val MAX_PAGES = 2
+    private const val TAG = "SPINDEL network"
 }

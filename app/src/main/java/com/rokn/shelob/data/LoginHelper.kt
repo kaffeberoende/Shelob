@@ -6,7 +6,7 @@ import android.widget.Toast
 import androidx.core.content.edit
 import com.google.gson.Gson
 import com.rokn.shelob.R
-import com.rokn.shelob.rawview.RawDataViewModel
+import com.rokn.shelob.graphview.GraphViewModel
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -15,12 +15,13 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 
 object LoginHelper {
+    const val TAG = "SPINDEL LOGIN"
     var token: String? = null
 
     fun login(context: Context): Boolean {
-        Log.d(RawDataViewModel.TAG, "login: ")
-        val apiKey = context.getSharedPreferences(RawDataViewModel.SHARED_PREFS, Context.MODE_PRIVATE).getString(
-            RawDataViewModel.API_KEY, null
+        Log.d(TAG, "login: ")
+        val apiKey = context.getSharedPreferences(GraphViewModel.SHARED_PREFS, Context.MODE_PRIVATE).getString(
+            GraphViewModel.API_KEY, null
         )
         if (apiKey != null) {
             val client = OkHttpClient().newBuilder()
@@ -28,9 +29,9 @@ object LoginHelper {
             val mediaType: MediaType = "text/plain".toMediaType()
             val body: RequestBody = "".toRequestBody(mediaType)
             val request = Request.Builder()
-                .url(RawDataViewModel.TOKEN_URL)
+                .url(GraphViewModel.TOKEN_URL)
                 .method("POST", body)
-                .addHeader(RawDataViewModel.API_KEY_HEADER, apiKey)
+                .addHeader(GraphViewModel.API_KEY_HEADER, apiKey)
                 .build()
             val response = client.newCall(request).execute()
             if (response.isSuccessful) {
@@ -40,16 +41,16 @@ object LoginHelper {
                         gson.fromJson<TokenResponse>(
                             it, TokenResponse::class.java
                         ).token ?: ""
-                    context.getSharedPreferences(RawDataViewModel.SHARED_PREFS, Context.MODE_PRIVATE)
+                    context.getSharedPreferences(GraphViewModel.SHARED_PREFS, Context.MODE_PRIVATE)
                         .edit(commit = true) {
-                            putString(RawDataViewModel.TOKEN, token)
+                            putString(GraphViewModel.TOKEN, token)
                         }
                     return true
 
                 }
 
             } else {
-                Log.d(RawDataViewModel.TAG, "login: failed to login")
+                Log.d(TAG, "login: failed to login")
 
             }
         } else {
@@ -57,4 +58,5 @@ object LoginHelper {
         }
         return false
     }
+
 }

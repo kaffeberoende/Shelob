@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rokn.shelob.data.*
-import com.rokn.shelob.rawview.RawDataViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
@@ -32,8 +31,8 @@ class GraphViewModel: ViewModel() {
         var token = LoginHelper.token
         if (token == null) {
             Log.d(TAG, "fetchData: fetching stored token")
-            token = context.getSharedPreferences(RawDataViewModel.SHARED_PREFS, Context.MODE_PRIVATE)
-                .getString(RawDataViewModel.TOKEN, null)
+            token = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE)
+                .getString(TOKEN, null)
         }
 
         if (token == null) {
@@ -57,5 +56,15 @@ class GraphViewModel: ViewModel() {
 
     companion object {
         private const val TAG = "SPINDEL GRAPH MODEL"
+        const val SHARED_PREFS = "prefs"
+        const val TOKEN = "token"
+        const val BASE_URL = "https://industrial.api.ubidots.com/api/v1.6/"
+        const val TOKEN_URL = "${BASE_URL}auth/token/"
+        const val API_KEY_HEADER = "x-ubidots-apikey"
+        const val API_KEY = "api_key"
+        const val DEVICE_NAME = "device_name"
+        const val CALIBRATION = "calibration"
+        const val TOKEN_HEADER = "X-Auth-Token"
+        const val START_TIME = "start_time"
     }
 }
