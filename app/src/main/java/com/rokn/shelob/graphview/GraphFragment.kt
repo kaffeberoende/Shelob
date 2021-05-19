@@ -44,21 +44,14 @@ class GraphFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val loginButton = view.findViewById<Button>(R.id.loginbutton)
-        loginButton.setOnClickListener {
+        if (model.isLoggedIn.value == true) {
+            showProgressBar(true)
+            model.fetchData(requireContext())
+        } else {
+            Log.d(RawDataFragment.TAG, "Logging in")
             lifecycleScope.launch(Dispatchers.IO) {
                 model.login(requireContext())
             }
-        }
-
-        if (model.isLoggedIn.value == true) {
-            loginButton.visibility = View.GONE
-            showProgressBar(true)
-            model.fetchData(requireContext())
-
-        } else {
-            Log.d(RawDataFragment.TAG, "Not logged in")
-            loginButton.visibility = View.VISIBLE
         }
 
         val refreshButton = view.findViewById<Button>(R.id.refresh_button)
@@ -84,15 +77,16 @@ class GraphFragment: Fragment() {
             showProgressBar(false)
         })
 
-
         model.isLoggedIn.observe(viewLifecycleOwner, {
             Log.d(RawDataFragment.TAG, "observed login: $it")
             if (it) {
-                loginButton.visibility = View.GONE
                 showProgressBar(true)
                 model.fetchData(requireContext())
             } else {
-                loginButton.visibility = View.VISIBLE
+                Log.d(RawDataFragment.TAG, "Logging in")
+                lifecycleScope.launch(Dispatchers.IO) {
+                    model.login(requireContext())
+                }
             }
         })
     }

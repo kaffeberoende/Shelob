@@ -23,7 +23,6 @@ class RawDataFragment : Fragment() {
     private val model by viewModels<RawDataViewModel>()
     private val adapter = TiltAdapter()
     private lateinit var recyclerView: RecyclerView
-    private lateinit var loginButton: Button
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -37,26 +36,21 @@ class RawDataFragment : Fragment() {
             gotoSettings()
         }
 
-        loginButton = view.findViewById(R.id.loginbutton)
-        loginButton.setOnClickListener {
-            lifecycleScope.launch(Dispatchers.IO) {
-                model.login(requireContext())
-            }
-        }
-
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter
 
         model.isLoggedIn.observe(viewLifecycleOwner, {
             Log.d(TAG, "observed login: $it")
             if (it) {
-                loginButton.visibility = View.GONE
                 showProgressBar(true)
                 model.fetchData(requireContext())
                 recyclerView.visibility = View.VISIBLE
             } else {
-                loginButton.visibility = View.VISIBLE
                 recyclerView.visibility = View.GONE
+                Log.d(TAG, "Logging in")
+                lifecycleScope.launch(Dispatchers.IO) {
+                    model.login(requireContext())
+                }
             }
         })
 
@@ -69,13 +63,13 @@ class RawDataFragment : Fragment() {
         })
 
         if (model.isLoggedIn.value == true) {
-            loginButton.visibility = View.GONE
             showProgressBar(true)
             model.fetchData(requireContext())
-
         } else {
-            Log.d(TAG, "Not logged in")
-            loginButton.visibility = View.VISIBLE
+            Log.d(TAG, "Logging in")
+            lifecycleScope.launch(Dispatchers.IO) {
+                model.login(requireContext())
+            }
         }
     }
 
